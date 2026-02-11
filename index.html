@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Notion Visitor Dashboard</title>
+  <title>Notion 訪客儀表板</title>
   <style>
     :root{
       --card-bg:#e6dfcf;
@@ -14,10 +14,7 @@
       --radius:18px;
     }
 
-    /* Notion embed 友善：置中 + 透明底 */
-    html, body{
-      height:100%;
-    }
+    html, body{ height:100%; }
     body{
       margin:0;
       display:flex;
@@ -28,11 +25,7 @@
       color:var(--text);
     }
 
-    .wrap{
-      width: 320px;
-      max-width: 92vw;
-    }
-
+    .wrap{ width: 320px; max-width: 92vw; }
     .panel{
       background:var(--card-bg);
       border-radius:var(--radius);
@@ -48,12 +41,7 @@
       margin-bottom:12px;
     }
 
-    .title{
-      font-weight:800;
-      font-size:16px;
-      line-height:1.2;
-    }
-
+    .title{ font-weight:800; font-size:16px; line-height:1.2; }
     .desc{
       margin-top:4px;
       font-size:12px;
@@ -87,11 +75,7 @@
       justify-content:space-between;
     }
 
-    .label{
-      font-size:11px;
-      color:var(--muted);
-    }
-
+    .label{ font-size:11px; color:var(--muted); }
     .value{
       font-weight:800;
       font-size:22px;
@@ -107,14 +91,8 @@
       justify-content:space-between;
       gap:10px;
     }
-
-    .hint{
-      opacity:0.9;
-    }
-
-    .status{
-      opacity:0.85;
-    }
+    .hint{ opacity:0.9; }
+    .status{ opacity:0.85; }
   </style>
 </head>
 
@@ -124,35 +102,35 @@
       <div class="head">
         <div>
           <div class="title">👾 瀏覽人數儀表板</div>
-          <div class="desc">提交需求就聯繫；不提交也沒關係，至少你看到了。:D</div>
+          <div class="desc">歡迎您來,若有需求請盡快與我聯繫! :D</div>
         </div>
-        <div class="pill" id="pill">Syncing…</div>
+        <div class="pill" id="pill">同步中…</div>
       </div>
 
       <div class="grid">
         <div class="stat">
-          <div class="label">Today</div>
+          <div class="label">今日</div>
           <div class="value" id="today">0</div>
         </div>
 
         <div class="stat">
-          <div class="label">Yesterday</div>
+          <div class="label">昨日</div>
           <div class="value" id="yesterday">0</div>
         </div>
 
         <div class="stat">
-          <div class="label">This Week</div>
+          <div class="label">本週</div>
           <div class="value" id="week">0</div>
         </div>
 
         <div class="stat">
-          <div class="label">Total</div>
+          <div class="label">累計</div>
           <div class="value" id="total">0</div>
         </div>
       </div>
 
       <div class="foot">
-        <div class="hint">* 計數為頁面載入次數（含自己測試）</div>
+        <div class="hint">* 計數為頁面載入次數</div>
         <div class="status" id="status">—</div>
       </div>
     </div>
@@ -161,18 +139,18 @@
 <script>
 /**
  * ✅ 真統計做法（CountAPI）
- * - Total：固定 key，每次打開頁面 +1
- * - Today：以日期 key（YYYY-MM-DD），每次打開頁面 +1
- * - Yesterday：讀取昨天日期 key（不增加）
- * - This Week：讀取「本週週一～今天」每日 key 的值加總（不增加）
+ * - 累計：固定 key，每次打開頁面 +1
+ * - 今日：以日期 key（YYYY-MM-DD），每次打開頁面 +1
+ * - 昨日：讀取昨天日期 key（不增加）
+ * - 本週：讀取「本週週一～今天」每日 key 的值加總（不增加）
  *
  * 你只要改兩個地方：
- * 1) namespace: 你想要的命名空間（避免撞 key）
- * 2) siteKey: 你的站點識別（同一個 widget 用同一個 key）
+ * 1) namespace：你的命名空間（避免撞 key）
+ * 2) siteKey：你的站點識別（同一個 widget 用同一個 key）
  */
 
-const namespace = "shella";          // ✅ 建議改成你自己的，例如 "sanheso"
-const siteKey   = "notion-dashboard"; // ✅ 建議改成你的 widget 名稱
+const namespace = "shella";
+const siteKey   = "notion-dashboard";
 
 // ---------- 日期工具 ----------
 function pad(n){ return String(n).padStart(2, "0"); }
@@ -183,7 +161,6 @@ function ymd(d){
   return `${y}-${m}-${day}`;
 }
 function startOfWeekMonday(d){
-  // 週一為起點
   const dd = new Date(d);
   const day = dd.getDay(); // 0=Sun
   const diff = (day === 0 ? -6 : 1 - day);
@@ -201,24 +178,23 @@ function addDays(d, n){
 async function hit(key){
   const url = `https://api.countapi.xyz/hit/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
   const res = await fetch(url);
-  return res.json(); // {value: number}
+  return res.json();
 }
 async function get(key){
   const url = `https://api.countapi.xyz/get/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
   const res = await fetch(url);
-  return res.json(); // {value: number} or {error: ...}
+  return res.json();
 }
 
 // ---------- UI 動畫 ----------
 function animateNumber(el, target){
   target = Number.isFinite(target) ? Math.max(0, Math.floor(target)) : 0;
   const start = 0;
-  const duration = 700; // ms
+  const duration = 700;
   const t0 = performance.now();
 
   function tick(now){
     const p = Math.min(1, (now - t0) / duration);
-    // easeOutCubic
     const eased = 1 - Math.pow(1 - p, 3);
     const val = Math.floor(start + (target - start) * eased);
     el.textContent = val.toLocaleString();
@@ -227,42 +203,31 @@ function animateNumber(el, target){
   requestAnimationFrame(tick);
 }
 
-function setPill(text){
-  document.getElementById("pill").textContent = text;
-}
-function setStatus(text){
-  document.getElementById("status").textContent = text;
-}
-
-function safeValue(obj){
-  return (obj && typeof obj.value === "number") ? obj.value : 0;
-}
+function setPill(text){ document.getElementById("pill").textContent = text; }
+function setStatus(text){ document.getElementById("status").textContent = text; }
+function safeValue(obj){ return (obj && typeof obj.value === "number") ? obj.value : 0; }
 
 (async function main(){
   try{
-    setPill("Updating…");
-    setStatus("loading");
+    setPill("更新中…");
+    setStatus("載入中");
 
     const now = new Date();
     const todayStr = ymd(now);
     const yesterdayStr = ymd(addDays(now, -1));
 
-    // keys
     const totalKey = `${siteKey}-total`;
     const todayKey = `${siteKey}-day-${todayStr}`;
     const yKey     = `${siteKey}-day-${yesterdayStr}`;
 
-    // ✅ 每次開啟：Total +1 & Today +1
     const [totalHit, todayHit] = await Promise.all([
       hit(totalKey),
       hit(todayKey),
     ]);
 
-    // ✅ 昨天：只讀取，不增加（沒有資料時視為 0）
     let yGet = await get(yKey);
     if(yGet && yGet.error) yGet = { value: 0 };
 
-    // ✅ 本週：週一～今天的每日值加總（只讀取）
     const monday = startOfWeekMonday(now);
     const days = [];
     for(let d = new Date(monday); d <= now; d = addDays(d, 1)){
@@ -275,18 +240,17 @@ function safeValue(obj){
     }));
     const weekSum = weekGets.reduce((acc, r) => acc + safeValue(r), 0);
 
-    // ---------- Render ----------
     animateNumber(document.getElementById("total"), safeValue(totalHit));
     animateNumber(document.getElementById("today"), safeValue(todayHit));
     animateNumber(document.getElementById("yesterday"), safeValue(yGet));
     animateNumber(document.getElementById("week"), weekSum);
 
     setPill(todayStr);
-    setStatus("ok");
+    setStatus("正常");
   }catch(e){
     console.error(e);
-    setPill("Error");
-    setStatus("failed");
+    setPill("錯誤");
+    setStatus("失敗");
   }
 })();
 </script>
