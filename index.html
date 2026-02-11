@@ -86,7 +86,6 @@ body{
 <div class="title">👥 瀏覽次數儀表板</div>
 <div class="desc">歡迎您來,若有需求請盡快與我聯繫! :) </div>
 </div>
-<div class="pill" id="pill">本地紀錄</div>
 </div>
 
 <div class="stat">
@@ -138,8 +137,6 @@ function todayStr(){
 
 (function(){
 
-  document.getElementById("pill").textContent="本地紀錄";
-
   let total=parseInt(localStorage.getItem(KEY_TOTAL)||"0",10);
   let dayData=JSON.parse(localStorage.getItem(KEY_DAY)||"{}");
 
@@ -167,7 +164,7 @@ function todayStr(){
 
 // ===== 重置按鈕 =====
 document.getElementById("resetBtn").onclick=function(){
-  if(confirm("確定要清除本地紀錄嗎？")){
+  if(confirm("確定要清除紀錄嗎？")){
     localStorage.clear();
     location.reload();
   }
